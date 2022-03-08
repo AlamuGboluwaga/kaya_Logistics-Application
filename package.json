@@ -1,0 +1,45 @@
+{
+  "name": "kayapay",
+  "version": "1.0.0",
+  "description": "A product of kaya africa technology. A money lending platform using technology to bridge the gap between operations and finance.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oolushola/kayapay.git"
+  },
+  "keywords": [
+    "payments",
+    "finance",
+    "logistics",
+    "cargo",
+    "goods"
+  ],
+  "author": "Olushola Odejobi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oolushola/kayapay/issues"
+  },
+  "homepage": "https://github.com/oolushola/kayapay#readme",
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^9.2.1",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "helmet": "^5.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.3",
+    "socket.io": "^4.4.1"
+  }
+}
