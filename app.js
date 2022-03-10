@@ -4,8 +4,8 @@ require('dotenv').config()
 const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
-const kayaPay = require('./src/server')
-
+const kayaPay = require('./src/config/server')
+const routes = require('./src/router/routes')
 const app = express()
 
 app.use(bodyParser.json())
@@ -21,12 +21,14 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use('*', (req, res, next) => {
+app.use(routes)
+
+app.use('*', (_, res, _2) => {
   res.status(404).json({
     status: 404,
     message: 'not found'
   })
 })
 
-kayaPay.SERVER(app)
+kayaPay.START_APPLICATION(app)
 

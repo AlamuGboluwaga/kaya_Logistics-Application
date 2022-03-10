@@ -1,0 +1,11 @@
+exports.userSchema = `
+  CREATE TABLE IF NOT EXISTS users(
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "email" VARCHAR(100) UNIQUE NOT NULL,
+    "password" VARCHAR(250) NOT NULL,
+    "emailVerifiedAt" VARCHAR(250) NULL,
+    "signUpInfo" JSONB NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )
+`
