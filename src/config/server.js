@@ -1,7 +1,6 @@
 const { Pool } = require('pg')
 require('dotenv').config()
 
-
 const PORT = process.env.ENV === 'development' ? 5000 : process.env.PORT
 
 const config = {
@@ -15,9 +14,9 @@ const config = {
 const pool = new Pool(config)
 
 module.exports = {
-  SERVER: (appInstance) => {
+  START_APPLICATION: (appInstance) => {
     try {
-      appInstance.listen(process.env.PORT, async () => {
+      appInstance.listen(PORT, async () => {
         await pool.connect()
         console.log(`SERVER RUNNING ON PORT: ${PORT}`)
       })
@@ -25,5 +24,7 @@ module.exports = {
     catch (err) {
       console.log(`Oops! SOMETHING WENT WRONG: ${err.message}`)
     }
-  }
+  },
+
+  pool
 }
