@@ -66,3 +66,39 @@ exports.SUSPEND_CLIENT = [
       }
     })
 ]
+
+exports.ADD_CLIENT_URL = [
+  check('clientId')
+    .custom(async (_, { req }) => {
+      const checkClientInfo = await pool.query('SELECT * FROM tbl_kp_clients WHERE id = $1', [req.params.clientId])
+      if (checkClientInfo.rowCount <= 0) {
+        throw new Error("not found")
+      }
+    }),
+  body("companyName")
+    .isString()
+    .notEmpty()
+    .toLowerCase(),
+  body("url")
+    .toLowerCase()
+    .isString()
+    .notEmpty()
+    .custom(async (value, { _ }) => {
+      const checkExt = await pool.query('SELECT * FROM tbl_kp_clients WHERE "url" = $1', [
+        value
+      ])
+      if (checkExt.rowCount > 0) {
+        throw new Error('conflict')
+      }
+    })
+]
+
+exports.CLIENT_URL_REMOVAL = [
+  check('clientId')
+    .custom(async (_, { req }) => {
+      const checkClientInfo = await pool.query('SELECT * FROM tbl_kp_clients WHERE id = $1', [req.params.clientId])
+      if (checkClientInfo.rowCount <= 0) {
+        throw new Error("not found")
+      }
+    })
+]
