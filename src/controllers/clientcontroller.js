@@ -108,6 +108,29 @@ class ClientController {
     }
   }
 
+  static async updateClientUrl(req, res, next) {
+    const clientId = req.params.clientId
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return response.error(
+        res, 422, 'validation error', errors.mapped()
+      )
+    }
+    try {
+      const { url } = req.body
+      const clientUrlQuery = 'UPDATE tbl_kp_clients SET url = $1 WHERE id = $2 RETURNING id, "companyName", url '
+      const requestClientUrl = await pool.query(clientUrlQuery, [url, clientId])
+      response.success(
+        res, 200, 'client domain updated', requestClientUrl.rows[0]
+      )
+    }
+    catch (err) {
+      response.error(
+        res, 500, 'internal server error', err.message
+      )
+    }
+  }
+
   static async uploadClientLogo() { }
 }
 

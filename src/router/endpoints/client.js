@@ -32,4 +32,10 @@ clientRoute.patch(
   clientController.suspendClient
 )
 
+clientRoute.patch(
+  '/update-client-url/:clientId',
+  VALIDATE.ADD_CLIENT_URL,
+  clientController.updateClientUrl
+)
+
 module.exports = clientRoute
