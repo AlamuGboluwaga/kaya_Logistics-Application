@@ -41,11 +41,10 @@ class ProductController {
         const prodIndex = existingProducts.findIndex(
           (prod) => prod.productName === productName
         );
-        if (prodIndex >= 0) {
-          products = [...existingProducts];
-        } else {
-          products = [...existingProducts, { productName: productName }];
-        }
+        products =
+          prodIndex >= 0
+            ? [...existingProducts]
+            : [...existingProducts, { productName: productName }];
       }
 
       const updateClientProductQuery = `UPDATE tbl_kp_clients SET products = $1 WHERE id = $2 RETURNING *`;
