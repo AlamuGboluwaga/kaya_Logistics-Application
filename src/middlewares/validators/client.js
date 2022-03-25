@@ -102,3 +102,16 @@ exports.CLIENT_URL_REMOVAL = [
       }
     })
 ]
+exports.ACCOUNT_MANAGER = [
+  check('clientId')
+    .custom(async (_, { req }) => {
+      const checkClientInfo = await pool.query('SELECT * FROM tbl_kp_clients WHERE id = $1', [req.params.clientId])
+      if (checkClientInfo.rowCount <= 0) {
+        throw new Error("not found")
+      }
+    }),
+  body('accountManagerId')
+    .notEmpty()
+    .trim()
+    .isString()
+]

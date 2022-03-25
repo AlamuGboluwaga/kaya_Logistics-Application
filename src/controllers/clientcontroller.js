@@ -4,10 +4,28 @@ const { validationResult } = require("express-validator");
 const response = require("../handlers/response");
 
 class ClientController {
+  static async accountManagers(req, res, next) {
+    try {
+      const accountManagerQuery =
+        'SELECT "id", "firstName", "lastName", "email" FROM users WHERE "id" NOT IN (SELECT "managedBy" FROM tbl_kp_clients WHERE "managedBy" <> NULL) AND "userType" = $1';
+      const accountManagerResult = await pool.query(accountManagerQuery, [
+        "partner",
+      ]);
+      return response.success(
+        res,
+        200,
+        "account managers",
+        accountManagerResult.rows
+      );
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
+
   static async allClients(req, res, next) {
     try {
       const clientsQuery = await pool.query(
-        'SELECT * FROM tbl_kp_clients ORDER BY "companyName" ASC'
+        'SELECT a.*, b."firstName", b."lastName", b."email" FROM tbl_kp_clients a LEFT JOIN users b ON a."managedBy" = b.id ORDER BY "companyName" ASC'
       );
       response.success(res, 200, "all clients", clientsQuery.rows);
     } catch (err) {
@@ -93,12 +111,70 @@ class ClientController {
   }
 
   static async suspendClient(req, res, next) {
-    const clientId = req.params.clientId
+    const clientId = req.params.clientId;
     try {
-      const patchClientQuery = 'UPDATE tbl_kp_clients SET "clientStatus" = $1 RETURNING id, "companyName", "clientStatus"'
-      const clientSuspension = await pool.query(patchClientQuery, [0])
+      const patchClientQuery =
+        'UPDATE tbl_kp_clients SET "clientStatus" = $1 RETURNING id, "companyName", "clientStatus"';
+      const clientSuspension = await pool.query(patchClientQuery, [0]);
       response.success(
-        res, 200, 'suspension activated', clientSuspension.rows[0]
+        res,
+        200,
+        "suspension activated",
+        clientSuspension.rows[0]
+      );
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
+
+  static async updateClientUrl(req, res, next) {
+    const clientId = req.params.clientId;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return response.error(res, 422, "validation error", errors.mapped());
+    }
+    try {
+      const { url } = req.body;
+      const clientUrlQuery =
+        'UPDATE tbl_kp_clients SET url = $1 WHERE id = $2 RETURNING id, "companyName", url ';
+      const requestClientUrl = await pool.query(clientUrlQuery, [
+        url,
+        clientId,
+      ]);
+      response.success(
+        res,
+        200,
+        "client domain updated",
+        requestClientUrl.rows[0]
+      );
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
+
+  static async addManager(req, res, next) {
+    const clientId = req.params.clientId
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return response.error(
+        res, 422, 'validation error', errors.mapped()
+      )
+    }
+    try {
+      const { accountManagerId } = req.body
+      const checkUserQuery = await pool.query(
+        'SELECT * FROM tbl_kp_clients WHERE "managedBy" = $1', [accountManagerId])
+      if (checkUserQuery.rowCount >= 1) {
+        return response.error(
+          res, 409, 'conflict', { msg: 'only one account allowed.' }
+        )
+      }
+      const clientManagerQuery = 'UPDATE tbl_kp_clients SET "managedBy" = $1 WHERE id = $2 RETURNING *'
+      const clientManager = await pool.query(clientManagerQuery, [
+        accountManagerId, clientId
+      ])
+      return response.success(
+        res, 200, 'account manager updated', clientManager.rows[0]
       )
     }
     catch (err) {
@@ -108,28 +184,7 @@ class ClientController {
     }
   }
 
-  static async updateClientUrl(req, res, next) {
-    const clientId = req.params.clientId
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return response.error(
-        res, 422, 'validation error', errors.mapped()
-      )
-    }
-    try {
-      const { url } = req.body
-      const clientUrlQuery = 'UPDATE tbl_kp_clients SET url = $1 WHERE id = $2 RETURNING id, "companyName", url '
-      const requestClientUrl = await pool.query(clientUrlQuery, [url, clientId])
-      response.success(
-        res, 200, 'client domain updated', requestClientUrl.rows[0]
-      )
-    }
-    catch (err) {
-      response.error(
-        res, 500, 'internal server error', err.message
-      )
-    }
-  }
+  static async removeClientUrl(req, res, next) { }
 
   static async uploadClientLogo() { }
 }

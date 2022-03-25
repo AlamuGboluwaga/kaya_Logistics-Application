@@ -2,6 +2,14 @@ const { body } = require('express-validator')
 const { pool } = require('../../config/server')
 
 exports.SIGNUP = [
+  body('firstName')
+    .isString()
+    .toLowerCase()
+    .notEmpty(),
+  body('lastName')
+    .isString()
+    .toLowerCase()
+    .notEmpty(),
   body('email')
     .isEmail()
     .notEmpty()
@@ -26,7 +34,11 @@ exports.SIGNUP = [
         throw new Error("password mismatch")
       }
       return true
-    })
+    }),
+  body('userType')
+    .isString()
+    .notEmpty()
+    .toLowerCase()
 ]
 
 exports.LOGIN = [
