@@ -45,7 +45,7 @@ class AuthController {
         signUpInfo,
       ]);
       const userId = poolResult.rows[0].id;
-      const token = GENERATE_TOKEN({ userId }, 3600)
+      const token = GENERATE_TOKEN({ userId }, 86400)
 
       await mailer.signUpEmail(email, 'Fantastic! You are in.', signUpWelcomeEmail(userId))
 
@@ -53,7 +53,7 @@ class AuthController {
         ...poolResult.rows[0],
         token,
         userId,
-        tokenExpiresIn: 3600
+        tokenExpiresIn: 86400
       });
     } catch (err) {
       response.error(res, 500, "internal server error", err.message)
@@ -76,7 +76,7 @@ class AuthController {
       }
       const userData = userInfo.rows[0]
       const { userType, id, firstName, lastName } = userData
-      const token = GENERATE_TOKEN({ userId: userInfo.rows[0].id }, 3600)
+      const token = GENERATE_TOKEN({ userId: userInfo.rows[0].id }, 86400)
       response.success(
         res, 200, 'login successful', {
         token,
@@ -85,7 +85,7 @@ class AuthController {
         firstName,
         lastName,
         id,
-        tokenExpiresIn: 3600
+        tokenExpiresIn: 86400
       }
       )
     }
