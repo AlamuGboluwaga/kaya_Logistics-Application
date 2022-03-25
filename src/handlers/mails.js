@@ -2,10 +2,10 @@ const { GENERATE_TOKEN } = require('../middlewares/middleware')
 require('dotenv').config()
 
 module.exports = {
-  signUpWelcomeEmail: () => {
+  signUpWelcomeEmail: (userId) => {
     const frontEndUrl = process.env.FRONTEND_URL
-    const tokenGenerated = GENERATE_TOKEN({ purpose: 'verifyEmailAddress' }, 300)
-    const verificationLink = `${frontEndUrl}?verifywith=${tokenGenerated}`
+    const tokenGenerated = GENERATE_TOKEN({ userId }, 300)
+    const verificationLink = `${frontEndUrl}verify-my-account?query=${tokenGenerated}`
     return `
       <html>
         <head>

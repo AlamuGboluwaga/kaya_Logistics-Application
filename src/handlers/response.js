@@ -10,7 +10,8 @@ module.exports = {
     res.status(statusCode).json({
       status: 'success',
       message: responseLabel,
-      data
+      data,
+      status: statusCode
     })
   },
 
@@ -24,7 +25,8 @@ module.exports = {
     res.status(statusCode).json({
       status: 'error',
       message: responseLabel,
-      errorData
+      errorData,
+      status: statusCode
     })
   }
 }

@@ -1,6 +1,6 @@
 const { pool } = require('../config/server')
 const { userSchema } = require('./schemas/userschema')
-const { clientSchema, alterClientWithStatus } = require('./schemas/clientschema')
+const { clientSchema } = require('./schemas/clientschema')
 
 const createTable = async (schemaQuery) => {
   try {
@@ -32,7 +32,6 @@ const createAllTables = async () => {
   try {
     await importTableData(userSchema, 'users', [])
     await importTableData(clientSchema, 'clients', [])
-    await importTableData(alterClientWithStatus, 'clients', [])
     console.log("All table created successfully.")
   }
   catch (err) {

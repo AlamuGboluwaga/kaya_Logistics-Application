@@ -38,4 +38,21 @@ clientRoute.patch(
   clientController.updateClientUrl
 )
 
+clientRoute.delete(
+  '/remove-client-url/:clientId',
+  VALIDATE.CLIENT_URL_REMOVAL,
+  clientController.removeClientUrl
+)
+
+clientRoute.get(
+  '/client-managers',
+  clientController.accountManagers
+)
+
+clientRoute.patch(
+  '/client/account-manager/:clientId',
+  VALIDATE.ACCOUNT_MANAGER,
+  clientController.addManager
+)
+
 module.exports = clientRoute
