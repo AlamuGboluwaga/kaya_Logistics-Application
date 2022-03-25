@@ -3,7 +3,8 @@ const router = express.Router()
 
 router.use(process.env.BASE_URL, [
   require('./endpoints/auth'),
-  require('./endpoints/client')
+  require('./endpoints/client'),
+  require('./endpoints/products')
 ])
 
 
