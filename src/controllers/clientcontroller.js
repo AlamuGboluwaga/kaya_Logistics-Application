@@ -4,6 +4,23 @@ const { validationResult } = require("express-validator");
 const response = require("../handlers/response");
 
 class ClientController {
+  static async getClientInfo(req, res, next) {
+    try {
+      const clientDetails = await pool.query('SELECT * FROM tbl_kp_clients WHERE "managedBy" = $1', [
+        req.userId
+      ])
+      response.success(
+        res, 200, 'client info', clientDetails.rows[0]
+      )
+    }
+    catch (err) {
+      response.error(
+        res, 500, 'internal server error', err.message
+      )
+    }
+  }
+
+
   static async accountManagers(req, res, next) {
     try {
       const accountManagerQuery =

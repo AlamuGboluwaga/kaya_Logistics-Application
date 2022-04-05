@@ -6,12 +6,18 @@ const response = require("../handlers/response");
 class LoadingSiteController {
   static async clientLoadingSites(req, res, next) {
     const clientId = req.headers.clientid;
-    console.log(clientId);
     try {
       const clientLoadingSiteQuery =
         'SELECT "loadingSites" FROM tbl_kp_clients WHERE id = $1';
-      const clientloadingsites = await pool.query(clientLoadingSiteQuery, [clientId]);
-      response.success(res, 200, "client loading sites", clientloadingsites.rows[0]);
+      const clientloadingsites = await pool.query(clientLoadingSiteQuery, [
+        clientId,
+      ]);
+      response.success(
+        res,
+        200,
+        "client loading sites",
+        clientloadingsites.rows[0]
+      );
     } catch (err) {
       response.error(res, 500, "internal server error", err.message);
     }
@@ -23,7 +29,7 @@ class LoadingSiteController {
       return response.error(res, 422, "validation failed", errors.mapped());
     }
     const clientId = req.headers.clientid;
-    const loadingSite = req.body.loadingSite;
+    const { loadingSite, dailyCapacity, location } = req.body;
     try {
       const getLoadingSitesInfo = await pool.query(
         "SELECT * FROM tbl_kp_clients WHERE id = $1",
@@ -33,25 +39,30 @@ class LoadingSiteController {
       if (!getLoadingSitesInfo.rows[0].loadingSites) {
         loadingSites = [
           {
-            loadingSite: loadingSite,
+            name: loadingSite,
+            dailyCapacity,
+            location,
           },
         ];
       } else {
         const existingLoadingSites = getLoadingSitesInfo.rows[0].loadingSites;
         const prodIndex = existingLoadingSites.findIndex(
-          (ls) => ls.loadingSite === loadingSite
+          (ls) => ls.name === loadingSite
         );
         loadingSites =
           prodIndex >= 0
             ? [...existingLoadingSites]
-            : [...existingLoadingSites, { loadingSite: loadingSite }];
+            : [
+              ...existingLoadingSites,
+              { name: loadingSite, dailyCapacity, location },
+            ];
       }
 
       const updateClientLoadingSiteQuery = `UPDATE tbl_kp_clients SET "loadingSites" = $1 WHERE id = $2 RETURNING *`;
-      const updatedLoadingSite = await pool.query(updateClientLoadingSiteQuery, [
-        JSON.stringify(loadingSites),
-        clientId,
-      ]);
+      const updatedLoadingSite = await pool.query(
+        updateClientLoadingSiteQuery,
+        [JSON.stringify(loadingSites), clientId]
+      );
       return response.success(
         res,
         200,
@@ -76,7 +87,9 @@ class LoadingSiteController {
         [clientId]
       );
       let results = checkLoadingSite.rows[0].loadingSites;
-      const loadingSites = results.filter((ls) => ls.loadingSite !== loadingSite);
+      const loadingSites = results.filter(
+        (ls) => ls.name !== loadingSite
+      );
 
       const updateloadingSitesQuery = await pool.query(
         'UPDATE tbl_kp_clients SET "loadingSites" = $1 WHERE id = $2 RETURNING id, "loadingSites"',

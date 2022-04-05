@@ -5,6 +5,12 @@ const VALIDATE = require('../../middlewares/validators/client')
 const middleware = require('../../middlewares/middleware')
 
 clientRoute.get(
+  '/client',
+  middleware.VERIFY_TOKEN,
+  clientController.getClientInfo
+)
+
+clientRoute.get(
   '/clients',
   middleware.VERIFY_TOKEN,
   clientController.allClients
