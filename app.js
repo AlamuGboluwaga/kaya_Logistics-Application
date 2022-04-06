@@ -7,6 +7,9 @@ const morgan = require('morgan')
 const kayaPay = require('./src/config/server')
 const routes = require('./src/router/routes')
 const app = express()
+const path = require('path')
+
+app.use(express.static(path.join(__dirname)))
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
