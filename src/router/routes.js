@@ -6,7 +6,8 @@ router.use(process.env.BASE_URL, [
   require('./endpoints/client'),
   require('./endpoints/products'),
   require('./endpoints/loadingsite'),
-  require('./endpoints/exactlocations')
+  require('./endpoints/exactlocations'),
+  require('./endpoints/trucktype')
 ])
 
 

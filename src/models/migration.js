@@ -2,6 +2,7 @@ const { pool } = require('../config/server')
 const { userSchema } = require('./schemas/userschema')
 const { clientSchema } = require('./schemas/clientschema')
 const exactLocationSchema = require('./schemas/exactlocationschema')
+const truckTypeSchema = require('./schemas/trucktypeschema')
 
 const createTable = async (schemaQuery) => {
   try {
@@ -34,6 +35,7 @@ const createAllTables = async () => {
     await importTableData(userSchema, 'users', [])
     await importTableData(clientSchema, 'clients', [])
     await importTableData(exactLocationSchema, 'tbl_kp_exact_locations', [])
+    await importTableData(truckTypeSchema, 'tbl_kp_truck_types', [])
     console.log("All table created successfully.")
   }
   catch (err) {
