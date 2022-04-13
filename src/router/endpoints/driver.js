@@ -20,6 +20,13 @@ driverRouter.get(
   driverController.driver
 )
 
+driverRouter.get(
+  '/verify-driver-licence',
+  middleware.VERIFY_TOKEN,
+  VALIDATE.VERIFY_DRIVER_LICENCE,
+  driverController.verifyDriverLicence
+)
+
 driverRouter.post(
   '/driver',
   middleware.VERIFY_TOKEN,

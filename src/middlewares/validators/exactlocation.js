@@ -19,9 +19,25 @@ exports.REMOVE_LOCATION = [
       [req.headers.locationid]
     );
     if (checkLocationId.rowCount <= 0) {
-      throw new Error("record not found")
+      throw new Error("record not found");
     }
-    req.locationInfo = checkLocationId.rows[0]
+    req.locationInfo = checkLocationId.rows[0];
+  }),
+];
+
+exports.LOCATION_PER_STATE = [
+  check("query").custom(async (_, { req }) => {
+    const state = req.query.location;
+    const checkLocationsByState = await pool.query(
+      "SELECT * FROM tbl_kp_exact_locations WHERE state = $1 ",
+      [state]
+    );
+    if (checkLocationsByState.rowCount <= 0) {
+      req.assignedStateLocations = []
+    }
+    else {
+      req.assignedStateLocations = checkLocationsByState.rows[0];
+    }
   }),
 ];
 

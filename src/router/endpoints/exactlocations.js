@@ -17,6 +17,13 @@ exactLocationRouter.get(
   locationscontroller.allLocations
 )
 
+exactLocationRouter.get(
+  '/location-by-state',
+  middleware.VERIFY_TOKEN,
+  VALIDATE.LOCATION_PER_STATE,
+  locationscontroller.getLocationByState
+)
+
 exactLocationRouter.post(
   '/exact-locations',
   middleware.VERIFY_TOKEN,
