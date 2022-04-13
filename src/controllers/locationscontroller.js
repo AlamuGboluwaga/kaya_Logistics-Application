@@ -24,6 +24,19 @@ class LocationController {
     }
   }
 
+  static async getLocationByState(req, res, next) {
+    try {
+      response.success(
+        res, 200, 'location per state', req.assignedStateLocations
+      )
+    }
+    catch (err) {
+      response.error(
+        res, 500, 'internal server error', err.message
+      )
+    }
+  }
+
   static async addLocations(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

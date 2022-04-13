@@ -61,6 +61,17 @@ class driverController {
     }
   }
 
+  static async verifyDriverLicence(req, res) {
+    try {
+      response.success(res, 200, "driver info", req.driverInfo);
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
+
+
+
+
   static async addDriver(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

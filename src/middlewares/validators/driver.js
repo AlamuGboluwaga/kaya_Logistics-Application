@@ -10,10 +10,24 @@ exports.DRIVER_INFO = [
         "SELECT * FROM tbl_kp_drivers WHERE id = $1",
         [value]
       );
-
       req.driverInfo = driverInfo.rows[0];
     }),
 ];
+
+
+exports.VERIFY_DRIVER_LICENCE = [
+  check("licenceNo")
+    .isString()
+    .trim()
+    .custom(async (_, { req }) => {
+      const licenceNo = req.query.licenceNo.toLowerCase()
+      const driverInfo = await pool.query(
+        "SELECT * FROM tbl_kp_drivers WHERE \"licenceNo\" = $1",
+        [licenceNo]
+      );
+      req.driverInfo = driverInfo.rows[0];
+    }),
+]
 
 exports.NEW_DRIVER = [
   body('firstName')
