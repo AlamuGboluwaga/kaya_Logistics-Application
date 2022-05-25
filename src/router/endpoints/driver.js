@@ -1,11 +1,8 @@
 const express = require('express')
 const { driverController, upload } = require('../../controllers/drivercontroller')
-
 const middleware = require('../../middlewares/middleware')
 const VALIDATE = require('../../middlewares/validators/driver')
-
 const driverRouter = express.Router()
-
 
 driverRouter.get(
   '/drivers',
