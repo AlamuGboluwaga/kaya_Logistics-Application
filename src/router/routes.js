@@ -9,7 +9,8 @@ router.use(process.env.BASE_URL, [
   require('./endpoints/exactlocations'),
   require('./endpoints/trucktype'),
   require('./endpoints/driver'),
-  require('./endpoints/orders/truckavailability')
+  require('./endpoints/orders/truckavailability'),
+  require('./endpoints/orders/order')
 ])
 
 

@@ -13,10 +13,10 @@ const mailTransport = nodemailer.createTransport({
 })
 
 module.exports = {
-  signUpEmail: async (receiver, subject, content) => {
+  notification: async (receiver, subject, content) => {
     try {
       await mailTransport.sendMail({
-        from: 'Fusitzai Truman <info@kayaafrica.co>',
+        from: 'Kaya Pay <info@kayaafrica.co>',
         to: receiver,
         subject: subject,
         html: content,
@@ -26,5 +26,5 @@ module.exports = {
     catch (err) {
       console.log(err)
     }
-  }
+  },
 }

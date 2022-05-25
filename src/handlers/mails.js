@@ -1,11 +1,16 @@
-const { GENERATE_TOKEN } = require('../middlewares/middleware')
-require('dotenv').config()
+const { GENERATE_TOKEN } = require("../middlewares/middleware");
+require("dotenv").config();
 
 module.exports = {
   signUpWelcomeEmail: (userId) => {
-    const frontEndUrl = process.env.FRONTEND_URL
-    const tokenGenerated = GENERATE_TOKEN({ userId }, 300)
-    const verificationLink = `${frontEndUrl}verify-my-account?query=${tokenGenerated}`
+    const frontEndUrl = process.env.FRONTEND_URL;
+    const tokenGenerated = GENERATE_TOKEN(
+      {
+        userId,
+      },
+      300
+    );
+    const verificationLink = `${frontEndUrl}verify-my-account?query=${tokenGenerated}`;
     return `
       <html>
         <head>
@@ -27,6 +32,30 @@ module.exports = {
 
         </body>
       </html>
-    `
-  }
-}
+    `;
+  },
+
+  waybillVerificationContent: (waybill, owner) => {
+    return `
+      <html>
+        <head>
+          <title></title>
+        </head>
+        <body>
+          <p>Hello, ${owner.firstName},</p>
+          We request your authority to verify this waybill before payment can be disbursed. 
+          <p>Please find below for waybill details: </p>
+          <ul>
+            ${waybill.map((item) => {
+      return `<li>
+                <a href="${item.attachment}" alt="${item.salesOrderNo}">
+                  ${item.salesOrderNo}
+                </a> - ${item.invoiceNo}
+            </li>`;
+    })}
+          </ul>
+        </body>
+      </html>
+    `;
+  },
+};

@@ -5,41 +5,10 @@ const {
   pool
 } = require("../config/server");
 const response = require("../handlers/response");
-const fs = require("fs");
 const path = require("path");
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
-require("dotenv").config();
+const { cloudinary, singleFileUpload } = require('../handlers/helpers')
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_SECRET,
-  secure: true,
-});
-
-const diskStorage = multer.diskStorage({
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype === "image/jpg" ||
-      file.mimetype === "image/png" ||
-      file.mimetype === "image/jpeg"
-    ) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
-  },
-});
-
-const upload = multer({
-  storage: diskStorage,
-}).single("licence");
+const upload = singleFileUpload("licence")
 
 class driverController {
   static async drivers(req, res) {
@@ -68,9 +37,6 @@ class driverController {
       response.error(res, 500, "internal server error", err.message);
     }
   }
-
-
-
 
   static async addDriver(req, res) {
     const errors = validationResult(req);
