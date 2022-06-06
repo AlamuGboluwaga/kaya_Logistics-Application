@@ -58,4 +58,41 @@ module.exports = {
       </html>
     `;
   },
+
+  kayaAdminWaybillConfirmation: (waybill, clientRate, confirmedAt, client, confirmedBy) => {
+    return `
+      <html>
+        <head>
+          <title></title>
+        </head>
+        <body>
+          <p>The following waybill has been confirmed to be genuine.</p>
+          <ul>
+            ${waybill.map((item) => {
+      return `<li>
+                <a href="${item.attachment}" alt="${item.salesOrderNo}">
+                  ${item.salesOrderNo}
+                </a> - ${item.invoiceNo}
+            </li>`;
+    })}
+          </ul>
+          <p>The rate for the trip is: ${clientRate} and confirmed at: ${confirmedAt}, by: ${confirmedBy} of ${client}</p>
+        </body>
+      </html>
+    `;
+  },
+
+  transporterVerificationApproval: (transporterName) => {
+    return `
+      <html>
+        <head>
+          <title></title>
+          <body>
+            <p>Hi ${transporterName}, </p>
+            <p>Trip has been confirmed, Your payment will be disbursed shortly.</p>
+          </body>
+        </head>
+      </html>
+    `
+  }
 };
