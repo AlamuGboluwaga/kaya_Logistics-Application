@@ -24,8 +24,7 @@ exports.AVAILABILITY = [
 exports.SELECTED_TRIP = [
   check("orderid").custom(async (value, { req }) => {
     const orderInfo = await pool.query(
-      "SELECT *  FROM tbl_kp_orders WHERE id = $1",
-      [value]
+      `SELECT a.*, b.id AS "waybillId", b.waybill as "waybills", b."verificationStatus",  b."invoiceStatus", b."invoiceDate", b."verificationStatus", b."approvalStatus", c.id AS "rateId", c."clientRate", c."transporterRate", c.incentive, c.ago, c.advance, c.balance, d."companyName", d."clientAlias" FROM tbl_kp_orders a LEFT JOIN tbl_kp_order_waybill b ON a.id = b."orderId" LEFT JOIN tbl_kp_order_payments c ON a.id = c."orderId" LEFT JOIN tbl_kp_clients d ON a.client = d.id WHERE a.id = $1`, [value]
     );
     req.orderInfo = orderInfo.rows[0];
   }),

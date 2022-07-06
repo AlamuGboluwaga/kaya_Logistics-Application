@@ -63,12 +63,12 @@ exports.orderSchema = `
 
 exports.alterOrderWaybillSchema = `
     ALTER TABLE tbl_kp_order_waybill 
-      ADD COLUMN "verificationStatus" BOOLEAN DEFAULT FALSE,
-      ADD COLUMN "verificationRequestedBy" UUID NULL,
-      ADD COLUMN "verificationRequestedAt" TIMESTAMP WITH TIME ZONE NULL,
-      ADD COLUMN "approvalStatus" BOOLEAN DEFAULT FALSE,
-      ADD COLUMN "verifiedBy" UUID NULL,
-      ADD COLUMN "verifiedAt" TIMESTAMP WITH TIME ZONE NULL
+      ADD COLUMN IF NOT EXISTS "verificationStatus" BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS "verificationRequestedBy" UUID NULL,
+      ADD COLUMN IF NOT EXISTS "verificationRequestedAt" TIMESTAMP WITH TIME ZONE NULL,
+      ADD COLUMN IF NOT EXISTS "approvalStatus" BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS "verifiedBy" UUID NULL,
+      ADD COLUMN IF NOT EXISTS "verifiedAt" TIMESTAMP WITH TIME ZONE NULL
 `;
 
 
@@ -83,6 +83,14 @@ exports.orderWaybillSchema = `
     "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT kp_order_waybill FOREIGN KEY("orderId") REFERENCES tbl_kp_orders(id) ON DELETE SET NULL
   )
+`;
+
+exports.alterPaymentSchema = `
+    ALTER TABLE tbl_kp_order_payments 
+      ADD COLUMN IF NOT EXISTS  "isFinanced" BOOLEAN DEFAULT FALSE,
+      ADD COLUMN IF NOT EXISTS "kayaPayOut" REAL NULL,
+      ADD COLUMN IF NOT EXISTS "kayaPayAdvance" REAL NULL,
+      ADD COLUMN IF NOT EXISTS "kayaPayBalance" REAL NULL
 `;
 
 exports.orderPaymentSchema = `

@@ -183,13 +183,12 @@ class orderController {
   }
 
   static async uploadWaybills(req, res) {
-    const { orderId } = req.order;
+    const { orderId, id } = req.order;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return response.error(res, 422, "validation failed", errors.mapped());
     }
     const waybills = JSON.parse(req.body.waybillInfo);
-    console.log(waybills);
     const selectedWaybills = req.files;
     try {
       if (!selectedWaybills) {
@@ -201,29 +200,59 @@ class orderController {
         );
       }
       let waybillDetails = [];
-      await Promise.all(
-        waybills.map(async (waybill, index) => {
-          const attachment = await uploadWaybills(
-            selectedWaybills[index].path,
-            `kaya-pay/waybills/${orderId}`
-          );
-          waybillDetails.push({
-            salesOrderNo: waybill.salesOrderNo,
-            invoiceNo: waybill.invoiceNo,
-            attachment: attachment.secure_url,
-          });
-        })
+      const existingWaybill = await pool.query(
+        'SELECT * FROM tbl_kp_order_waybill WHERE "orderId" = $1',
+        [id]
       );
-      const addedWaybills = await pool.query(
-        'INSERT INTO tbl_kp_order_waybill ("orderId", waybill) VALUES ($1, $2) RETURNING *',
-        [req.order.id, JSON.stringify(waybillDetails)]
-      );
-      response.success(
-        res,
-        200,
-        "waybill successfully uploaded",
-        addedWaybills.rows
-      );
+      if (existingWaybill.rowCount > 0) {
+        await Promise.all(
+          waybills.map(async (waybill, index) => {
+            const attachment = await uploadWaybills(
+              selectedWaybills[index].path,
+              `kaya-pay/waybills/${orderId}`
+            );
+            waybillDetails.push(...existingWaybill.rows[0].waybill, {
+              salesOrderNo: waybill.salesOrderNo,
+              invoiceNo: waybill.invoiceNo,
+              attachment: attachment.secure_url,
+            });
+          })
+        );
+        const updateExistingWaybill = await pool.query(
+          "UPDATE tbl_kp_order_waybill SET waybill = $1 WHERE id = $2  RETURNING *",
+          [JSON.stringify(waybillDetails), existingWaybill.rows[0].id]
+        );
+        return response.success(
+          res,
+          200,
+          "waybill added successfully",
+          updateExistingWaybill.rows[0]
+        );
+      } else {
+        await Promise.all(
+          waybills.map(async (waybill, index) => {
+            const attachment = await uploadWaybills(
+              selectedWaybills[index].path,
+              `kaya-pay/waybills/${orderId}`
+            );
+            waybillDetails.push({
+              salesOrderNo: waybill.salesOrderNo,
+              invoiceNo: waybill.invoiceNo,
+              attachment: attachment.secure_url,
+            });
+          })
+        );
+        const addedWaybills = await pool.query(
+          'INSERT INTO tbl_kp_order_waybill ("orderId", waybill) VALUES ($1, $2) RETURNING *',
+          [req.order.id, JSON.stringify(waybillDetails)]
+        );
+        response.success(
+          res,
+          200,
+          "waybill successfully uploaded",
+          addedWaybills.rows[0]
+        );
+      }
     } catch (err) {
       response.error(res, 500, "internal server error", err.message);
     }
@@ -284,53 +313,80 @@ class orderController {
     if (!errors.isEmpty()) {
       return response.error(res, 422, "validation failed", errors.mapped());
     }
-    const { incentives, gtv, ago } = req.body;
+    const { incentives, gtv, ago, isFinanced, payout } = req.body;
     const orderId = req.headers.orderid;
     let advancePayable,
       balancePayable,
-      transporterRate,
       rate,
       totalIncentives,
       query,
+      kayaPayOut = 0,
+      kayaPayAdvance = 0,
+      kayaPayBalance = 0,
       queryResp;
     totalIncentives = incentives.reduce((acc, curr) => {
       return (acc += curr.amount);
     }, 0);
     rate = gtv + totalIncentives + ago;
-    transporterRate = ((100 / (100 + +process.env.INTEREST_RATE)) * rate).toFixed(2)
-    advancePayable = ((+process.env.ADVANCE_RATE / 100) * transporterRate).toFixed(2);
-    balancePayable = ((+process.env.BALANCE_RATE / 100) * transporterRate).toFixed(2);
+    if (isFinanced) {
+      kayaPayOut = (rate - ((+process.env.INTEREST_RATE / 100) * rate)).toFixed(
+        2
+      );
+      kayaPayAdvance = ((+process.env.ADVANCE_RATE / 100) * rate).toFixed(
+        2
+      );
+      const deduction = (+process.env.INTEREST_RATE / 100) * rate;
+      kayaPayBalance = (((+process.env.BALANCE_RATE / 100) * rate) - deduction).toFixed(
+        2
+      );
+    }
+
+    advancePayable = (
+      (+process.env.ADVANCE_RATE / 100) *
+      payout
+    ).toFixed(2);
+    balancePayable = (
+      (+process.env.BALANCE_RATE / 100) *
+      payout
+    ).toFixed(2);
     try {
       const checkTripQuery =
         'SELECT * FROM tbl_kp_order_payments WHERE "orderId" = $1';
       const availableTripResult = await pool.query(checkTripQuery, [orderId]);
       if (availableTripResult.rowCount > 0) {
         query =
-          'UPDATE tbl_kp_order_payments SET "clientRate" = $1, "transporterRate" = $2, incentive = $3, ago = $4, advance = $5, balance = $6 WHERE id = $7 RETURNING *';
+          'UPDATE tbl_kp_order_payments SET "clientRate" = $1, "transporterRate" = $2, incentive = $3, ago = $4, advance = $5, balance = $6, "isFinanced" = $7, "kayaPayOut" = $8, "kayaPayAdvance" = $9, "kayaPayBalance" = $10 WHERE id = $11 RETURNING *';
         queryResp = await pool.query(query, [
           gtv,
-          transporterRate,
+          payout,
           JSON.stringify(incentives),
           ago,
           advancePayable,
           balancePayable,
+          isFinanced,
+          kayaPayOut,
+          kayaPayAdvance,
+          kayaPayBalance,
           availableTripResult.rows[0].id,
         ]);
       } else {
-        query = 'INSERT INTO tbl_kp_order_payments ("orderId", "clientRate", "transporterRate", "incentive", "ago", "advance", "balance") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
+        query =
+          'INSERT INTO tbl_kp_order_payments ("orderId", "clientRate", "transporterRate", "incentive", "ago", "advance", "balance", "isFinanced", "kayaPayOut", "kayaPayAdvance", "kayaPayBalance") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *';
         queryResp = await pool.query(query, [
           orderId,
           gtv,
-          transporterRate,
+          payout,
           JSON.stringify(incentives),
           ago,
           advancePayable,
           balancePayable,
-        ])
+          isFinanced,
+          kayaPayOut,
+          kayaPayAdvance,
+          kayaPayBalance,
+        ]);
       }
-      response.success(
-        res, 200, 'rate uploaded', queryResp.rows[0]
-      )
+      response.success(res, 200, "rate uploaded", queryResp.rows[0]);
     } catch (err) {
       response.error(res, 500, "internal server error", err.message);
     }
@@ -359,7 +415,7 @@ const lastTripId = async () => {
 
 const orderQuery = async (clause, clauseValue, offsetVal, perPage) => {
   return await pool.query(
-    `SELECT a.*, concat(b."firstName", ' ', b."lastName") AS transporter, c."clientAlias", d."truckType",  CONCAT(e."firstName", ' ', e."lastName") AS driver, e."phoneNo" AS "driverPhoneNo", f.id AS "waybillId", f.waybill, f."invoiceStatus", f."invoiceDate", f."verificationStatus", f."approvalStatus", g."clientRate", g."transporterRate", g."incentive", g.advance, g.balance, g."advanceRequestedAt", g."advancePaidAt", g."balanceRequestedBy", g."balanceRequestedAt", g."balancePaidAt", g.ago FROM tbl_kp_orders a JOIN users b ON a."ownedBy" = b.id JOIN tbl_kp_clients c ON a.client = c.id JOIN tbl_kp_truck_types d ON a."truckType" = d.id JOIN tbl_kp_drivers e ON a.driver = e.id LEFT JOIN tbl_kp_order_waybill f ON a.id = f."orderId" LEFT JOIN tbl_kp_order_payments g ON a.id = g."orderId" AND "tripStatus" = TRUE ${clause} ORDER BY a."orderId" DESC OFFSET ${offsetVal} LIMIT ${perPage}`,
+    `SELECT a.*, concat(b."firstName", ' ', b."lastName") AS transporter, c."clientAlias", d."truckType",  CONCAT(e."firstName", ' ', e."lastName") AS driver, e."phoneNo" AS "driverPhoneNo", f.id AS "waybillId", f.waybill, f."invoiceStatus", f."invoiceDate", f."verificationStatus", f."approvalStatus", g."clientRate", g."transporterRate", g."incentive", g.advance, g.balance, g."advanceRequestedAt", g."advancePaidAt", g."balanceRequestedBy", g."balanceRequestedAt", g."balancePaidAt", g.ago, g."isFinanced", g."kayaPayOut", g."kayaPayAdvance", g."kayaPayBalance" FROM tbl_kp_orders a JOIN users b ON a."ownedBy" = b.id JOIN tbl_kp_clients c ON a.client = c.id JOIN tbl_kp_truck_types d ON a."truckType" = d.id JOIN tbl_kp_drivers e ON a.driver = e.id LEFT JOIN tbl_kp_order_waybill f ON a.id = f."orderId" LEFT JOIN tbl_kp_order_payments g ON a.id = g."orderId" AND "tripStatus" = TRUE ${clause} ORDER BY a."orderId" DESC OFFSET ${offsetVal} LIMIT ${perPage}`,
     [clauseValue]
   );
 };
