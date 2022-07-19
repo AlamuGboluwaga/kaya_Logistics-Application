@@ -14,7 +14,7 @@ const dropTable = async (tableName) => {
 
 const dropAllTables = async () => {
   try {
-    await dropTable('users')
+    await dropTable('tbl_kp_trip_events')
     console.log('all table(s) dropped successfully')
   }
   catch (err) {
