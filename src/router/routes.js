@@ -11,7 +11,8 @@ router.use(process.env.BASE_URL, [
   require('./endpoints/driver'),
   require('./endpoints/orders/truckavailability'),
   require('./endpoints/orders/order'),
-  require('./endpoints/orders/pendingverification')
+  require('./endpoints/orders/pendingverification'),
+  require('./endpoints/orders/tripevent')
 ])
 
 
