@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const { cloudinary, multipleFileUpload } = require("../../handlers/helpers");
 const mailer = require("../../handlers/mailer");
 const mails = require("../../handlers/mails");
+const { newTruck } = require('../truckcontroller')
 
 const uploads = multipleFileUpload("waybill");
 
@@ -82,6 +83,7 @@ class orderController {
         'UPDATE tbl_kp_truck_availabilities SET "gatedIn" = $1, "gatedInAt" = $2, "gatedInBy" = $3, "availabilityStatus" = $4 WHERE id = $5',
         ["yes", gatedInAt, req.userId, "no", id]
       );
+      await newTruck(truckNo, truckType, tonnage)
       response.success(res, 200, "new order created", newOrder.rows[0]);
     } catch (err) {
       return response.error(res, 500, "internal server error", err.message);
@@ -128,6 +130,7 @@ class orderController {
           tripType,
         ]
       );
+      await newTruck(truckNo, truckType, tonnage)
       response.success(res, 201, "new order created", newOrder.rows[0]);
     } catch (err) {
       return response.error(res, 500, "internal server error", err.message);
