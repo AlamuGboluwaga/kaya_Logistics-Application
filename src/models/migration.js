@@ -4,6 +4,7 @@ const { clientSchema } = require("./schemas/clientschema");
 const { driverSchema } = require("./schemas/driverschema");
 const exactLocationSchema = require("./schemas/exactlocationschema");
 const truckTypeSchema = require("./schemas/trucktypeschema");
+const ticketschema  = require ("./schemas/ticketschema")
 const {
   truckAvailabilitySchema,
   orderPaymentSchema,
@@ -54,6 +55,7 @@ const createAllTables = async () => {
     await importTableData(alterPaymentSchema, "alterPaymentSchema", []);
     await importTableData(tripEventSchema, "tripEvent", [])
     await importTableData(truckSchema, 'trucks', [])
+      await importTableData(ticketschema, "tickets", []);
     console.log("All table created successfully.");
   } catch (err) {
     console.log(err);

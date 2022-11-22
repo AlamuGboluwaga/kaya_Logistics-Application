@@ -1,14 +1,10 @@
-const {
-  validationResult
-} = require("express-validator");
-const {
-  pool
-} = require("../config/server");
+const { validationResult } = require("express-validator");
+const { pool } = require("../config/server");
 const response = require("../handlers/response");
 const path = require("path");
-const { cloudinary, singleFileUpload } = require('../handlers/helpers')
+const { cloudinary, singleFileUpload } = require("../handlers/helpers");
 
-const upload = singleFileUpload("licence")
+const upload = singleFileUpload("licence");
 
 class driverController {
   static async drivers(req, res) {
@@ -43,18 +39,19 @@ class driverController {
     if (!errors.isEmpty()) {
       return response.error(res, 422, "validation failed", errors.mapped());
     }
-    const {
-      firstName,
-      lastName,
-      licenceNo,
-      phoneNo,
-      licenceUrl,
-      expiryDate
-    } = req.body;
+    const { firstName, lastName, licenceNo, phoneNo, licenceUrl, expiryDate } =
+      req.body;
     try {
       const newDriver = await pool.query(
         'INSERT INTO tbl_kp_drivers ("firstName", "lastName", "phoneNo", "licenceNo", "licenceUrl", "expiryDate") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [firstName, lastName, JSON.stringify(phoneNo), licenceNo, licenceUrl, expiryDate]
+        [
+          firstName,
+          lastName,
+          JSON.stringify(phoneNo),
+          licenceNo,
+          licenceUrl,
+          expiryDate,
+        ]
       );
       response.success(res, 200, "driver info added", newDriver.rows[0]);
     } catch (err) {
@@ -75,11 +72,19 @@ class driverController {
         licenceNo,
         phoneNo,
         licenceUrl,
-        expiryDate
+        expiryDate,
       } = req.body;
       const updatedDriver = await pool.query(
         'UPDATE tbl_kp_drivers SET "firstName" = $1, "lastName" = $2, "phoneNo" = $3, "licenceNo" = $4, "licenceUrl" = $5, "expiryDate" = $6  WHERE id = $7 RETURNING *',
-        [firstName, lastName, JSON.stringify(phoneNo), licenceNo, licenceUrl, expiryDate, driverId]
+        [
+          firstName,
+          lastName,
+          JSON.stringify(phoneNo),
+          licenceNo,
+          licenceUrl,
+          expiryDate,
+          driverId,
+        ]
       );
       response.success(res, 200, "truck type updated", updatedDriver.rows[0]);
     } catch (err) {
@@ -102,7 +107,7 @@ class driverController {
     }
   }
 
-  static async removeDriver(req, res) { }
+  static async removeDriver(req, res) {}
 }
 
 module.exports = {
