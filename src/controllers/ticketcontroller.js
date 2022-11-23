@@ -17,21 +17,37 @@ class TicketController {
       response.error(res, 500, "internal server error", err.message);
     }
   }
+  static async getTicketById(req, res) {
+    try {
+      // const userType = "admin";
+      // if (userType === "admin") {
+        // const ticketId = req.headers.ticketid;
+        const id = req.params.id;
+        const ticket = await pool.query(
+          "SELECT * FROM tbl_kp_tickets WHERE id = $1",
+          [id]
+        );
+        return response.success(res, 200, "ticket info", ticket.rows);
+      // }
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
 
   static async addTicket(req, res) {
     // const validate = TICKET_VALIDATOR.validate(req.body, errors);
-    
+
     try {
-        const { categoryName, description } = req.body;
-        console.log(1)
-        const newTicket = await pool.query(
-          'INSERT INTO tbl_kp_tickets ("categoryName","description") VALUES ($1,$2) RETURNING *',
-          [categoryName, description]
-        );
-  
+      const { categoryName, description } = req.body;
+      console.log(1);
+      const newTicket = await pool.query(
+        'INSERT INTO tbl_kp_tickets ("categoryName","description") VALUES ($1,$2) RETURNING *',
+        [categoryName, description]
+      );
+
       response.success(res, 200, "Ticket added", newTicket.rows[0]);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       response.error(res, 500, "internal server error", err.message);
     }
   }

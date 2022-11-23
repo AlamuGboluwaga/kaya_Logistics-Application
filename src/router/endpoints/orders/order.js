@@ -6,12 +6,8 @@ const VALIDATOR = require('../../../middlewares/validators/order')
 
 const orderRouter = express.Router()
 
-orderRouter.get(
-  '/orders',
-  middleware.VERIFY_TOKEN,
-  VALIDATOR.USER_CATEGORY,
-  orderController.orders
-)
+// orderRouter.get('/orders', middleware.VERIFY_TOKEN,VALIDATOR.USER_CATEGOR,orderController.orders
+// )
 
 orderRouter.get(
   '/order-details',
