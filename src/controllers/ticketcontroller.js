@@ -89,9 +89,9 @@ class TicketController {
 
   static async updateTicket(req, res) {
     const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   return response.error(res, 422, "validation failed", errors.mapped());
-    // }
+    if (!errors.isEmpty()) {
+      return response.error(res, 422, "validation failed", errors.mapped());
+    }
     try {
       const ticketId = req.params.ticketId;
       const { categoryName, description } = req.body;
