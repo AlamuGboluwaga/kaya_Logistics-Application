@@ -5,6 +5,7 @@ const { driverSchema } = require("./schemas/driverschema");
 const exactLocationSchema = require("./schemas/exactlocationschema");
 const truckTypeSchema = require("./schemas/trucktypeschema");
 const ticketschema  = require ("./schemas/ticketschema")
+
 const {
   truckAvailabilitySchema,
   orderPaymentSchema,
