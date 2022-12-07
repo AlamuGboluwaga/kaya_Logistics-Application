@@ -27,10 +27,11 @@ ticketRouter.get(
    );
 
    ticketRouter.put(
-     "/update-ticket",
+     "/update-ticket/:id",
      // middleware.VERIFY_TOKEN,
       CHECK_TICKET,
      TicketController.updateTicket
    );
+ticketRouter.delete("/delete-ticket/:id", TicketController.removeTicket);
 
    (module.exports = ticketRouter);

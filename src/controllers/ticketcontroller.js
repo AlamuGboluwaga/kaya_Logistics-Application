@@ -21,13 +21,13 @@ class TicketController {
     try {
       // const userType = "admin";
       // if (userType === "admin") {
-        // const ticketId = req.headers.ticketid;
-        const id = req.params.id;
-        const ticket = await pool.query(
-          "SELECT * FROM tbl_kp_tickets WHERE id = $1",
-          [id]
-        );
-        return response.success(res, 200, "ticket info", ticket.rows);
+      // const ticketId = req.headers.ticketid;
+      const id = req.params.id;
+      const ticket = await pool.query(
+        "SELECT * FROM tbl_kp_tickets WHERE id = $1",
+        [id]
+      );
+      return response.success(res, 200, "ticket info", ticket.rows);
       // }
     } catch (err) {
       response.error(res, 500, "internal server error", err.message);
@@ -39,7 +39,7 @@ class TicketController {
 
     try {
       const { categoryName, description } = req.body;
-      console.log(1);
+
       const newTicket = await pool.query(
         'INSERT INTO tbl_kp_tickets ("categoryName","description") VALUES ($1,$2) RETURNING *',
         [categoryName, description]
@@ -51,56 +51,58 @@ class TicketController {
       response.error(res, 500, "internal server error", err.message);
     }
   }
+
+  static async removeTicket(req, res) {
+    try {
+      const id = req.params.id;
+      const checkTicket = await pool.query(
+        "SELECT * FROM tbl_kp_tickets WHERE id = $1",
+        [id],
+        (error, data) => {
+          const ticketnotFound = !data.rows.length;
+          if (ticketnotFound) {
+            return res
+              .status(404)
+              .json({ Error: "Ticket does not Exist in the Database" });
+          }
+          pool.query(
+            "DELETE FROM tbl_kp_tickets WHERE id =$1",
+            [id],
+            (error) => {
+              if (error) {
+                return res.status(403).json({ Error: "Ticket  not deleted" });
+              }
+              return res
+                .status(200)
+                .json({ Message: "Ticket has been successfully deleted " });
+            }
+          );
+        }
+      );
+    } catch (error) {
+      if (error) {
+        throw Error(error);
+      }
+    }
+  }
+
+
   static async updateTicket(req, res) {
     const errors = validationResult(req);
     // if (!errors.isEmpty()) {
     //   return response.error(res, 422, "validation failed", errors.mapped());
     // }
     try {
-      const ticketId = req.headers.ticketid;
+      const ticketId = req.params.ticketId;
       const { categoryName, description } = req.body;
       const updatedTicket = await pool.query(
-        'UPDATE tbl_kp_tickets SET "categoryName" = $1, "description " = $2, WHERE id = $3 RETURNING *',
+        'UPDATE tbl_kp_tickets SET "categoryName" = $1, "description" = $2  WHERE id = $3 RETURNING *',
         [categoryName, description, ticketId]
       );
-      response.success(res, 200, "ticket updated", updateTicket.rows[0]);
-    } catch (err) {
-      response.error(res, 500, "internal server error", err.message);
-    }
-  }
-  static async removeTicket(req, res) {
-    try {
-      const ticketId = req.headers.ticketid;
-      console.log(ticketId);
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return response.error(res, 422, "validation error", errors.mapped());
-      }
-      const { categoryName, description } = req.body;
-      const checkTicket = await pool.query(
-        "SELECT tickets FROM  tbl_kp_tickets WHERE id = $1",
-        [ticketId]
-      );
-      let results = checkTicket.rows[0].tickets;
-
-      const tickets = results.filter(
-        (tick) => tick.categoryName !== categoryName
-      );
-
-      const updateTicketsQuery = await pool.query(
-        "UPDATE tbl_kp_tickets SET  tickets = $1 WHERE id = $2 RETURNING id,  tickets",
-        [JSON.stringify(tickets), ticketId]
-      );
-      response.success(
-        res,
-        200,
-        "ticket removed successfully",
-        updateTicketsQuery.rows[0]
-      );
+      response.success(res, 200, "Ticket updated", updatedTicket.rows[0]);
     } catch (err) {
       response.error(res, 500, "internal server error", err.message);
     }
   }
 }
-
 module.exports = TicketController;
