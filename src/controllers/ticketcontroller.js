@@ -85,8 +85,6 @@ class TicketController {
       }
     }
   }
-
-
   static async updateTicket(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
