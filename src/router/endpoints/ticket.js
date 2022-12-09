@@ -4,11 +4,9 @@ const middleware = require("../../middlewares/middleware");
 const TicketController = require("../../controllers/ticketcontroller");
 const CHECK_TICKET = require("../../middlewares/validators/ticket");
 
-
-
 ticketRouter.post(
   "/new-ticket",
-// middleware.VERIFY_TOKEN,
+  // middleware.VERIFY_TOKEN,
   CHECK_TICKET,
   TicketController.addTicket
 );
@@ -17,21 +15,23 @@ ticketRouter.get(
   "/tickets",
   // middleware.VERIFY_TOKEN,
 
-     TicketController.allTickets
-   );
+  TicketController.allTickets
+);
 
-   ticketRouter.get(
-     "/ticket/:id",
-     // middleware.VERIFY_TOKEN,
-     TicketController.getTicketById
-   );
+ticketRouter.get(
+  "/ticket/:id",
+  // middleware.VERIFY_TOKEN,
+  TicketController.getTicketById
+);
 
-   ticketRouter.put(
-     "/update-ticket/:id",
-     // middleware.VERIFY_TOKEN,
-      CHECK_TICKET,
-     TicketController.updateTicket
-   );
+ticketRouter.put(
+  "/update-ticket/:id",
+  // middleware.VERIFY_TOKEN,
+  CHECK_TICKET,
+  TicketController.updateTicket
+);
 ticketRouter.delete("/delete-ticket/:id", TicketController.removeTicket);
 
-   (module.exports = ticketRouter);
+// ticketRouter.delete("deleteAll",TicketController.deleteAll)
+
+module.exports = ticketRouter;

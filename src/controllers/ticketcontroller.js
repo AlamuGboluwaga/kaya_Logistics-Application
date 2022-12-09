@@ -1,42 +1,30 @@
 const { pool } = require("../config/server");
-const { validationResult } = require("express-validator");
+const { validationResult, check } = require("express-validator");
 const response = require("../handlers/response");
 require("dotenv").config();
-const TICKET_VALIDATOR = require("../middlewares/validators/ticket");
 const errors = require("../middlewares/validators/ticket");
+const CHECK_TICKET = require("../middlewares/validators/ticket")
 
 class TicketController {
-  static async allTickets(req, res) {
-    try {
-      const userType = "admin";
-      if (userType === "admin") {
-        const tickets = await pool.query("SELECT * FROM tbl_kp_tickets");
-        return response.success(res, 200, "ticket info", tickets.rows);
-      }
-    } catch (err) {
-      response.error(res, 500, "internal server error", err.message);
-    }
-  }
-  static async getTicketById(req, res) {
-    try {
-      // const userType = "admin";
-      // if (userType === "admin") {
-      // const ticketId = req.headers.ticketid;
-      const id = req.params.id;
-      const ticket = await pool.query(
-        "SELECT * FROM tbl_kp_tickets WHERE id = $1",
-        [id]
+
+static async addTicket(req, res) {
+  try {
+      const validate = CHECK_TICKET.validate(req.body);
+      const { categoryName, description } = req.body;
+   
+
+      const newTicket = await pool.query(
+        'INSERT INTO tbl_kp_tickets ("categoryName","description") VALUES ($1,$2) RETURNING *',
+        [categoryName, description]
       );
-      return response.success(res, 200, "ticket info", ticket.rows);
-      // }
+
+      response.success(res, 200, "Ticket added", newTicket.rows[0]);
     } catch (err) {
+      console.log(err);
       response.error(res, 500, "internal server error", err.message);
     }
   }
-
   static async addTicket(req, res) {
-    // const validate = TICKET_VALIDATOR.validate(req.body, errors);
-
     try {
       const { categoryName, description } = req.body;
 
@@ -52,6 +40,35 @@ class TicketController {
     }
   }
 
+  static async allTickets(req, res) {
+    try {
+      const userType = "admin";
+      if (userType === "admin") {
+        const tickets = await pool.query("SELECT * FROM tbl_kp_tickets");
+        return response.success(res, 200, "ticket info", tickets.rows);
+      }
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
+  static async getTicketById(req, res) {
+    try {
+      const id = req.params.id;
+      const ticket = await pool.query(
+        "SELECT * FROM tbl_kp_tickets WHERE id = $1",
+        [id]
+      );
+      if (ticket.rows == 0) {
+        return res
+          .status(200)
+          .json({ Error: "Ticket not found in the database" });
+      }
+      return response.success(res, 200, "ticket info", ticket.rows);
+      // }
+    } catch (err) {
+      response.error(res, 500, "internal server error", err.message);
+    }
+  }
   static async removeTicket(req, res) {
     try {
       const id = req.params.id;
@@ -102,5 +119,10 @@ class TicketController {
       response.error(res, 500, "internal server error", err.message);
     }
   }
+//   static async deleteAll(req, res) {
+//     await pool.query("DELETE * FROM tbl_kp_tickets", [ categoryName,description]);
+//     return res.status(200).json({message:"Succefully cleared"})
+// }
+
 }
 module.exports = TicketController;
