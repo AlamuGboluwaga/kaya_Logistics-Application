@@ -5,7 +5,6 @@ const VALIDATOR = require('../../middlewares/validators/clientproduct')
 
 const productRouter = express.Router()
 
-
 productRouter.get(
   '/client-products',
   middleware.VERIFY_TOKEN,

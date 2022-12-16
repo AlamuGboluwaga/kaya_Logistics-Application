@@ -4,7 +4,6 @@ const middleware = require('../../middlewares/middleware')
 const { TruckController } = require('../../controllers/truckcontroller')
 const VALIDATOR = require('../../middlewares/validators/truck')
 
-
 truckRouter.post(
   '/new-truck',
   middleware.VERIFY_TOKEN,

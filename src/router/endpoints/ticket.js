@@ -6,7 +6,7 @@ const CHECK_TICKET = require("../../middlewares/validators/ticket");
 
 ticketRouter.post(
   "/new-ticket",
-  // middleware.VERIFY_TOKEN,
+// middleware.VERIFY_TOKEN,
   CHECK_TICKET,
   TicketController.addTicket
 );
