@@ -32,6 +32,4 @@ ticketRouter.put(
 );
 ticketRouter.delete("/delete-ticket/:id", TicketController.removeTicket);
 
-ticketRouter.delete("deleteAll",TicketController.deleteAll)
-
 module.exports = ticketRouter;
