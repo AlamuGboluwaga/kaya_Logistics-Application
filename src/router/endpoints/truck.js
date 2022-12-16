@@ -30,6 +30,4 @@ truckRouter.put(
   VALIDATOR.addTruck,
   TruckController.updateTruck
 )
-
-
 module.exports = truckRouter
